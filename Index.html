@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CGC FAC Tenure Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --white: #ffffff;
+    --surface: #ffffff;
+    --surface2: #eef2f7;
+    --border: #d0dae8;
+    --border-light: #e5ecf5;
+    --text: #1a2740;
+    --text-secondary: #4a5f7a;
+    --muted: #7a90ab;
+    --columbia-blue: #75aadb;
+    --columbia-blue-dark: #4a87c2;
+    --columbia-blue-deep: #1d4f8c;
+    --columbia-navy: #0f2d5e;
+    --columbia-light: #ddeaf7;
+    --accent-gold: #c4a44a;
+    --red: #c0392b;
+    --orange: #d4681a;
+    --yellow: #b8920e;
+    --green: #1e7e4e;
+    --red-bg: #fdf0ee;
+    --orange-bg: #fdf4ec;
+    --yellow-bg: #fdfaec;
+    --green-bg: #edf7f2;
+    --radius: 10px;
+    --shadow: 0 1px 4px rgba(15,45,94,0.08), 0 4px 16px rgba(15,45,94,0.05);
+    --shadow-sm: 0 1px 3px rgba(15,45,94,0.07);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--columbia-navy);
+    border-bottom: 3px solid var(--columbia-blue);
+    padding: 0 36px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(15,45,94,0.18);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 14px 0;
+  }
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-img {
+    height: 60px;
+    width: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(117,170,219,0.4);
+    flex-shrink: 0;
+  }
+  .logo-text h1 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+  .logo-text p {
+    color: var(--columbia-blue);
+    font-size: 11px;
+    margin-top: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .header-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(117,170,219,0.3);
+    flex-shrink: 0;
+  }
+  .header-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(117,170,219,0.2);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 80px;
+    transition: background 0.2s;
+  }
+  .stat-pill:hover { background: rgba(255,255,255,0.12); }
+  .stat-pill .num {
+    font-family: 'Source Serif 4', serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+  .stat-pill .label {
+    font-size: 10px;
+    color: var(--columbia-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 3px;
+    font-weight: 600;
+  }
+  .stat-pill.critical .num { color: #f4a59a; }
+  .stat-pill.warning .num { color: #f5c88a; }
+  .stat-pill.watch .num { color: #f5e08a; }
+
+  /* CONTROLS */
+  .controls {
+    padding: 14px 36px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    box-shadow: var(--shadow-sm);
+  }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .ctrl-group label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  select, input[type=text] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-family: 'Source Sans 3', sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 155px;
+  }
+  select:focus, input[type=text]:focus {
+    border-color: var(--columbia-blue-dark);
+    box-shadow: 0 0 0 3px rgba(74,135,194,0.15);
+  }
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 32px; min-width: 210px; }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .btn-add {
+    margin-left: auto;
+    background: var(--columbia-blue-deep);
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 20px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(29,79,140,0.2);
+  }
+  .btn-add:hover {
+    background: var(--columbia-navy);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29,79,140,0.25);
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 36px;
+    background: var(--white);
+    border-bottom: 2px solid var(--border-light);
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--columbia-blue-dark); }
+  .tab.active { color: var(--columbia-blue-deep); border-bottom-color: var(--columbia-blue-deep); font-weight: 600; }
+  .tab-badge {
+    display: inline-block;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    margin-left: 5px;
+    color: var(--muted);
+    border: 1px solid var(--border-light);
+  }
+  .tab.active .tab-badge {
+    background: var(--columbia-light);
+    color: var(--columbia-blue-deep);
+    border-color: var(--columbia-blue);
+  }
+
+  /* MAIN */
+  .main { padding: 22px 36px; }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--white);
+    box-shadow: var(--shadow);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr {
+    background: var(--columbia-navy);
+  }
+  th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--columbia-blue);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(117,170,219,0.2);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+  }
+  th:hover { color: #fff; }
+  th.sorted { color: #fff; }
+  th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+  th.sorted .sort-arrow { opacity: 1; }
+  tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f0f6fc; }
+  td { padding: 11px 14px; vertical-align: middle; }
+  .td-name { font-weight: 600; color: var(--columbia-blue-deep); cursor: pointer; }
+  .td-name:hover { text-decoration: underline; }
+  .td-role {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .td-role.chair {
+    background: rgba(196,164,74,0.12);
+    color: #8a6e1a;
+    border: 1px solid rgba(196,164,74,0.3);
+  }
+  .td-role.member {
+    background: var(--columbia-light);
+    color: var(--columbia-blue-deep);
+    border: 1px solid rgba(74,135,194,0.25);
+  }
+  .td-cgc { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+  .td-school { color: var(--muted); font-size: 12px; max-width: 170px; }
+  .td-date { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 13px; color: var(--text-secondary); }
+
+  .urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .urgency-badge::before { content: '●'; font-size: 7px; }
+  .urgency-badge.expired {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: rgba(192,57,43,0.2);
+  }
+  .urgency-badge.critical {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: rgba(192,57,43,0.15);
+  }
+  .urgency-badge.warning {
+    background: var(--orange-bg);
+    color: var(--orange);
+    border-color: rgba(212,104,26,0.15);
+  }
+  .urgency-badge.watch {
+    background: var(--yellow-bg);
+    color: var(--yellow);
+    border-color: rgba(184,146,14,0.15);
+  }
+  .urgency-badge.ok {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: rgba(30,126,78,0.15);
+  }
+  .urgency-badge.none {
+    background: var(--surface2);
+    color: var(--muted);
+    border-color: var(--border-light);
+  }
+
+  .action-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 5px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: all 0.18s;
+    margin-left: 3px;
+  }
+  .action-btn:hover { border-color: var(--columbia-blue-dark); color: var(--columbia-blue-deep); background: var(--columbia-light); }
+  .action-btn.delete:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+  .no-results { padding: 60px 20px; text-align: center; color: var(--muted); background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); }
+  .no-results span { font-size: 32px; display: block; margin-bottom: 10px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,45,94,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(15,45,94,0.18);
+  }
+  .modal h2 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 20px;
+    color: var(--columbia-navy);
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--columbia-light);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .form-field input, .form-field select, .form-field textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: 'Source Sans 3', sans-serif;
+    outline: none;
+    min-width: unset;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-field textarea { resize: vertical; min-height: 70px; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: var(--columbia-blue-dark);
+    box-shadow: 0 0 0 3px rgba(74,135,194,0.12);
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+  .btn-save {
+    background: var(--columbia-blue-deep);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 22px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(29,79,140,0.2);
+  }
+  .btn-save:hover { background: var(--columbia-navy); box-shadow: 0 4px 12px rgba(29,79,140,0.25); }
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 9px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+
+  /* DETAIL PANEL */
+  .detail-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,45,94,0.45);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .detail-overlay.hidden { display: none; }
+  .detail-panel {
+    background: var(--white);
+    border-left: 3px solid var(--columbia-blue);
+    width: 390px;
+    max-width: 100vw;
+    height: 100%;
+    overflow-y: auto;
+    padding: 28px;
+    animation: slideIn 0.2s ease;
+    box-shadow: -4px 0 20px rgba(15,45,94,0.12);
+  }
+  @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .detail-header { background: var(--columbia-navy); margin: -28px -28px 0; padding: 20px 24px; border-bottom: 2px solid var(--columbia-blue); }
+  .detail-close {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(117,170,219,0.3);
+    color: var(--columbia-blue);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    float: right;
+    transition: all 0.2s;
+  }
+  .detail-close:hover { background: rgba(255,255,255,0.18); color: #fff; }
+  .detail-name {
+    font-family: 'Source Serif 4', serif;
+    font-size: 20px;
+    color: #fff;
+    margin-top: 10px;
+    clear: both;
+    line-height: 1.3;
+  }
+  .detail-role-cgc { display: flex; gap: 8px; align-items: center; margin: 10px 0 0; }
+  .detail-body { padding-top: 20px; }
+  .detail-section { margin-bottom: 18px; }
+  .detail-section h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+  .detail-section p { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .detail-section a { color: var(--columbia-blue-dark); text-decoration: none; }
+  .detail-section a:hover { text-decoration: underline; }
+  .detail-divider { border: none; border-top: 1px solid var(--border-light); margin: 16px 0; }
+  .tenure-bar {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 7px;
+    margin-top: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+  }
+  .tenure-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .header, .controls, .main { padding-left: 16px; padding-right: 16px; }
+    .tabs { padding: 0 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-panel { width: 100%; }
+    .header-stats { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-area">
+      <img src="data:image/png;base64,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" class="logo-img" alt="Columbia Global"/>
+      <div class="logo-text">
+        <h1>Faculty Advisory Committee</h1>
+        <p>Columbia Global Centres — Tenure Tracker</p>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-stats" id="headerStats"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>CGC Centre</label>
+    <select id="filterCGC" onchange="render()">
+      <option value="">All Centres</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Tenure Window</label>
+    <select id="filterWindow" onchange="render()">
+      <option value="6">Expiring in 6 months</option>
+      <option value="3">Expiring in 3 months</option>
+      <option value="1">Expiring in 1 month</option>
+      <option value="12">Expiring in 12 months</option>
+      <option value="expired">Already Expired</option>
+      <option value="all">All Members</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Role</label>
+    <select id="filterRole" onchange="render()">
+      <option value="">All Roles</option>
+      <option value="Chair">Chair</option>
+      <option value="Member">Member</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Sort by</label>
+    <select id="sortBy" onchange="render()">
+      <option value="termEnd">Term End Date</option>
+      <option value="name">Name</option>
+      <option value="cgc">CGC Centre</option>
+      <option value="daysLeft">Days Remaining</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Search</label>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Name, school, email..." oninput="render()"/>
+    </div>
+  </div>
+  <button class="btn-add" onclick="openModal()">+ Add Member</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-all" onclick="setTab('all')">All <span class="tab-badge" id="badge-all">0</span></div>
+  <div class="tab" id="tab-expired" onclick="setTab('expired')">Expired <span class="tab-badge" id="badge-expired">0</span></div>
+  <div class="tab" id="tab-1" onclick="setTab('1')">≤ 1 Month <span class="tab-badge" id="badge-1">0</span></div>
+  <div class="tab" id="tab-3" onclick="setTab('3')">≤ 3 Months <span class="tab-badge" id="badge-3">0</span></div>
+  <div class="tab" id="tab-6" onclick="setTab('6')">≤ 6 Months <span class="tab-badge" id="badge-6">0</span></div>
+</div>
+
+<div class="main">
+  <div class="table-wrap" id="tableWrap">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th onclick="toggleSort('name')">Name <span class="sort-arrow">↕</span></th>
+          <th onclick="toggleSort('cgc')">Centre <span class="sort-arrow">↕</span></th>
+          <th>Role</th>
+          <th onclick="toggleSort('school')">School</th>
+          <th onclick="toggleSort('termStart')">Term Start <span class="sort-arrow">↕</span></th>
+          <th onclick="toggleSort('termEnd')">Term End <span class="sort-arrow">↕</span></th>
+          <th>Length</th>
+          <th onclick="toggleSort('daysLeft')">Status <span class="sort-arrow">↕</span></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+  <div id="noResults" class="no-results hidden">
+    <span>🔍</span>No members match your current filters.
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Add FAC Member</h2>
+    <div class="form-grid">
+      <div class="form-field"><label>First Name *</label><input type="text" id="f-first" placeholder="First name"/></div>
+      <div class="form-field"><label>Last Name *</label><input type="text" id="f-last" placeholder="Last name"/></div>
+      <div class="form-field">
+        <label>CGC Centre *</label>
+        <select id="f-cgc">
+          <option value="">Select Centre</option>
+          <option>Amman</option><option>Athens</option><option>Beijing</option>
+          <option>Istanbul</option><option>Mumbai</option><option>Nairobi</option>
+          <option>Paris</option><option>Rio de Janeiro</option><option>Santiago</option><option>Tunis</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>FAC Role</label>
+        <select id="f-role"><option value="Member">Member</option><option value="Chair">Chair</option></select>
+      </div>
+      <div class="form-field"><label>Email</label><input type="text" id="f-email" placeholder="uni@columbia.edu"/></div>
+      <div class="form-field"><label>School / Department</label><input type="text" id="f-school" placeholder="e.g. SEAS, Law, SIPA..."/></div>
+      <div class="form-field"><label>Term Start</label><input type="date" id="f-termStart"/></div>
+      <div class="form-field"><label>Term End</label><input type="date" id="f-termEnd"/></div>
+      <div class="form-field">
+        <label>Term Length</label>
+        <select id="f-termLength">
+          <option value="">Select</option>
+          <option value="1 year">1 year</option>
+          <option value="2 years">2 years</option>
+          <option value="3 years">3 years</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Point of Contact</label><input type="text" id="f-poc" placeholder="Name &lt;email&gt;"/></div>
+      <div class="form-field full"><label>Title</label><input type="text" id="f-title" placeholder="Academic title..."/></div>
+      <div class="form-field full"><label>Notes</label><textarea id="f-notes" placeholder="Sabbatical, special status, etc."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveMember()">Save Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay hidden" id="detailOverlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<script>
+const RAW_DATA = [{"cgc":"Amman","role":"Chair","name":"Sarah Knuckey","email":"sk3946@columbia.edu","title":"Lieff, Cabraser, Heimann and Bernstein Clinical Professor of Human Rights","school":"Law","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Lisa Anderson","email":"la8@columbia.edu","title":"James T. Shotwell Professor Emerita of International Relations; Dean Emerita, School of International and Public Affairs; Special Lecturer in International and Public Affairs","school":"SIPA","termStart":"2024-02-06","termEnd":"2025-02-05","termLength":"1 year","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Melissa Begg","email":"mdb3@columbia.edu","title":"Dean, School of Social Work; Professor of Social Work and Biostatistics","school":"Social Work","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Brian Boyd","email":"brian.boyd@columbia.edu","title":"Senior Lecturer; Director of Museum Anthropology; Co-Director, Center for Palestine Studies","school":"Arts & Sciences - Anthropology","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Sarah Cole","email":"sc891@columbia.edu","title":"Dean, School of the Arts; Parr Professor of English and Comparative Literature","school":"School of the Arts","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Gil Hochberg","email":"gh2472@columbia.edu","title":"Ransford Professor of Hebrew and Visual Studies, Comparative Literature, and Middle East Studies","school":"Arts & Sciences - MESAAS","termStart":"2024-02-06","termEnd":"2025-02-25","termLength":"1 year","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Matthew Keegan","email":"mlkeegan@barnard.edu","title":"Assistant Professor of Asian and Middle Eastern Cultures","school":"Barnard - Asian and Middle Eastern Cultures","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"","poc":""},{"cgc":"Amman","role":"Member","name":"Laura Kurgan","email":"ljk33@columbia.edu","title":"Professor of Architecture; Director, Center for Spatial Research","school":"GSAPP","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"On sabbatical during the 2025-2026 academic year","poc":""},{"cgc":"Amman","role":"Member","name":"Daniel M. Naujoks","email":"daniel.naujoks@columbia.edu","title":"Lecturer of International and Public Affairs; Director, International Organization and UN Studies","school":"SIPA","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Chair","name":"Alexander Cooley","email":"ac210@columbia.edu","title":"Vice Provost for Research and Academic Centers, Barnard College; Claire Tow Professor of Political Science","school":"Barnard College - Political Science","termStart":"2024-01-26","termEnd":"2027-01-25","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Dimitris Antoniou","email":"da2500@columbia.edu","title":"Lecturer in Hellenic Studies; Associate Director, Stavros Niarchos Foundation Public Humanities Initiative","school":"Arts & Sciences - Classics","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Carol Becker","email":"cbecker@columbia.edu","title":"Dean Emerita, School of the Arts; Professor of the Arts","school":"School of the Arts","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Charles Branas","email":"c.branas@columbia.edu","title":"Gelman Professor of Epidemiology; Chair, Department of Epidemiology","school":"Mailman School of Public Health","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"George Deodatis","email":"deodatis@columbia.edu","title":"Vice Dean for Research; Santiago and Robertina Calatrava Family Professor of Civil Engineering","school":"SEAS","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Stathis Gourgouris","email":"ssg93@columbia.edu","title":"Professor of Classics and of English and Comparative Literature; Director, Program in Hellenic Studies","school":"Arts & Sciences - Classics","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Elena Ladas","email":"ejd14@cumc.columbia.edu","title":"Sid and Helaine Lerner Professor for Global Integrative Medicine","school":"CUIMC","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"John Ma","email":"jtm2179@columbia.edu","title":"Professor of Classics","school":"Arts & Sciences - Classics","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"On leave during the 2025-2026 academic year","poc":""},{"cgc":"Athens","role":"Member","name":"Costis Maglaras","email":"cm479@columbia.edu","title":"Dean, Columbia Business School; David and Lyn Silfen Professor of Business","school":"CBS","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Ioannis Mylonopoulos","email":"jm3193@columbia.edu","title":"Associate Professor of Art History and Archaeology","school":"Arts & Sciences - Art History","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Christos Papadimitriou","email":"christos@columbia.edu","title":"Donovan Family Professor of Computer Science","school":"SEAS","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Karen Van Dyck","email":"vandyck@columbia.edu","title":"Kimon A. Doukas Professor of Modern Greek Language and Literature","school":"Arts & Sciences - Classics","termStart":"2024-06-11","termEnd":"2027-06-10","termLength":"3 years","notes":"","poc":""},{"cgc":"Athens","role":"Member","name":"Kathryn Yatrakis","email":"kby1@columbia.edu","title":"Faculty Advisor, Office of the President; Dean of Academic Affairs, Columbia College, ret.","school":"Arts & Sciences","termStart":"2024-01-29","termEnd":"2027-01-28","termLength":"3 years","notes":"","poc":""},{"cgc":"Beijing","role":"Chair","name":"Ben Liebman","email":"bliebm@law.columbia.edu","title":"Robert L Lieff Professor of Law","school":"Law","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":"Hannah Elizabeth Phipps <hp2688@columbia.edu>"},{"cgc":"Beijing","role":"Member","name":"Shih-Fu Chang","email":"shih.fu.chang@columbia.edu","title":"Dean, The Fu Foundation School of Engineering and Applied Science","school":"SEAS","termStart":"2024-01-27","termEnd":"2025-01-26","termLength":"1 year","notes":"","poc":"Esther Schwartz <es3410@columbia.edu>"},{"cgc":"Beijing","role":"Member","name":"Qin Gao","email":"qin.gao@columbia.edu","title":"Maurice V. Russell Professor of Social Policy and Social Work Practice","school":"Social Work","termStart":"2024-01-27","termEnd":"2027-01-26","termLength":"3 years","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Ed Guo","email":"exg1@columbia.edu","title":"Stanley Dicker Professor of Biomedical Engineering","school":"SEAS","termStart":"2024-01-27","termEnd":"2025-01-26","termLength":"1 year","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Yiping Han","email":"ywh2102@cumc.columbia.edu","title":"Professor of Microbial Sciences in Dental Medicine","school":"Dental","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Merit Janow","email":"mj60@columbia.edu","title":"Professor of Professional Practice in International Economic Law; Dean Emerita, SIPA","school":"SIPA","termStart":"2024-01-27","termEnd":"2027-01-26","termLength":"3 years","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Soulaymane Kachani","email":"kachani@columbia.edu","title":"Senior Vice Provost; Professor of Professional Practice in IEOR","school":"SEAS","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":"Aurora Morrison <am6735@columbia.edu>"},{"cgc":"Beijing","role":"Member","name":"Eugenia Lean","email":"eyl2006@columbia.edu","title":"Vice Provost for Faculty Affairs; Professor of East Asian Languages and Cultures","school":"Arts & Sciences - East Asian Languages","termStart":"2024-01-27","termEnd":"2026-01-26","termLength":"2 years","notes":"","poc":"Emily Brown-Baker <eb3433@columbia.edu>"},{"cgc":"Beijing","role":"Member","name":"Lydia Liu","email":"ll2410@columbia.edu","title":"Wun Tsun Tam Professor in the Humanities","school":"Arts & Sciences - East Asian Languages","termStart":"2024-01-27","termEnd":"2026-01-26","termLength":"2 years","notes":"On sabbatical during the fall 2025 semester.","poc":""},{"cgc":"Beijing","role":"Member","name":"Sam Sia","email":"ss2735@columbia.edu","title":"Vice Provost for the Fourth Purpose and Strategic Impact; Professor of Biomedical Engineering","school":"SEAS","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"On sabbatical during the fall 2025 semester","poc":"Helene Montagna <hm2605@columbia.edu>"},{"cgc":"Beijing","role":"Member","name":"Mingfang Ting","email":"ting@ldeo.columbia.edu","title":"Professor of Climate; Co-Senior Director for Education","school":"Climate","termStart":"2024-01-27","termEnd":"2025-01-26","termLength":"1 year","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Weiping Wu","email":"weiping.wu@columbia.edu","title":"Vice Provost for Academic Programs; Professor of Architecture, Planning and Preservation","school":"GSAPP","termStart":"2024-01-27","termEnd":"2026-01-26","termLength":"2 years","notes":"","poc":""},{"cgc":"Beijing","role":"Member","name":"Tian Zheng","email":"tian.zheng@columbia.edu","title":"Professor of Statistics; Chair, Department of Statistics","school":"Arts & Sciences - Statistics","termStart":"2024-01-27","termEnd":"2027-01-26","termLength":"3 years","notes":"","poc":""},{"cgc":"Istanbul","role":"Chair","name":"Zainab Bahrani","email":"zb2101@columbia.edu","title":"Edith Porada Professor of Ancient Near Eastern Art History and Archaeology","school":"Arts & Sciences - Art History","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"On sabbatical during the 2025-2026 academic year","poc":""},{"cgc":"Istanbul","role":"Member","name":"Hamid Dabashi","email":"hd14@columbia.edu","title":"Hagop Kevorkian Professor of Iranian Studies and Comparative Literature","school":"Arts & Sciences - MESAAS","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Vishakha Desai","email":"vd2278@columbia.edu","title":"Columbia Global Senior Advisor; Senior Fellow in Global Thought","school":"Committee on Global Thought","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Ebru Gencer","email":"eag44@columbia.edu","title":"Adjunct Associate Professor of Architecture, Planning and Preservation","school":"GSAPP","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Carol Gluck","email":"cg9@columbia.edu","title":"George Sansom Professor Emerita of History","school":"Arts & Sciences - History","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Ayten Gündoğdu","email":"agundogd@barnard.edu","title":"Associate Professor of Political Science","school":"Barnard - Political Science","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Valentina Izmirlieva","email":"vbi1@columbia.edu","title":"Professor of Slavic Languages","school":"Arts & Sciences - Slavic Languages","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"On sabbatical during the 2025-2026 academic year","poc":""},{"cgc":"Istanbul","role":"Member","name":"Çağhan Kizil","email":"ck2893@cumc.columbia.edu","title":"Associate Professor of Neurological Sciences","school":"CUIMC","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Holger Klein","email":"hak56@columbia.edu","title":"Lisa and Bernard Selz Professor of Medieval Art History","school":"Arts & Sciences - Art History","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Istanbul","role":"Member","name":"Ahmet Tunç Şen","email":"ats2171@columbia.edu","title":"Assistant Professor of History","school":"Arts & Sciences - History","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Chair","name":"Anil Rustgi","email":"akr2164@cumc.columbia.edu","title":"Herbert and Florence Irving Professor of Medicine; Director of HICCC","school":"CUIMC","termStart":"2025-03-28","termEnd":"2027-03-27","termLength":"2 years","notes":"Chair from Nov 12, 2025 - Spring 2027","poc":"Batori, Maria <mb3155@cumc.columbia.edu>"},{"cgc":"Mumbai","role":"Member","name":"Thomas Hatch","email":"th2127@columbia.edu","title":"Professor of Education; Director, National Center for Restructuring Education","school":"Teachers College","termStart":"2025-03-31","termEnd":"2027-03-01","termLength":"2 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Shivaram Rajagopal","email":"sr3269@columbia.edu","title":"Roy Bernard Kester and T.W. Byrnes Professor of Accounting and Auditing","school":"CBS","termStart":"2025-03-28","termEnd":"2027-03-27","termLength":"2 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Garud Iyengar","email":"garud@ieor.columbia.edu","title":"Professor of Industrial Engineering and Operations Research","school":"SEAS","termStart":"2025-03-01","termEnd":"2028-03-01","termLength":"3 years","notes":"","poc":"Maisem Jaloudi <mj3146@columbia.edu>"},{"cgc":"Mumbai","role":"Member","name":"Ioannis (John) Kymissis","email":"ik2174@columbia.edu","title":"Kenneth Brayer Professor of Electrical Engineering; Chair, Dept of Electrical Engineering","school":"SEAS","termStart":"2025-03-28","termEnd":"2028-03-27","termLength":"3 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Kathrin Schilling","email":"ks3759@cumc.columbia.edu","title":"Assistant Professor of Environmental Health Sciences","school":"Mailman School of Public Health","termStart":"2025-03-28","termEnd":"2028-03-27","termLength":"3 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Olajide Williams","email":"ow11@cumc.columbia.edu","title":"Professor of Neurology; Vice Dean of Community Health","school":"CUIMC","termStart":"2025-03-28","termEnd":"2028-03-27","termLength":"3 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Akeel Bilgrami","email":"ab41@columbia.edu","title":"Sidney Morgenbesser Professor of Philosophy","school":"Arts & Sciences - Philosophy","termStart":null,"termEnd":"2026-03-01","termLength":"1 year","notes":"On sabbatical during 2025-2026 academic year","poc":""},{"cgc":"Mumbai","role":"Member","name":"Lynn Freedman","email":"lpf1@cumc.columbia.edu","title":"Professor of Population and Family Health","school":"Mailman School of Public Health","termStart":null,"termEnd":"2026-03-01","termLength":"1 year","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Nikhar Gaikwad","email":"nikhar.gaikwad@columbia.edu","title":"Assistant Professor of Political Science","school":"Arts & Sciences - Political Science","termStart":null,"termEnd":"2027-03-01","termLength":"2 years","notes":"On leave for 2025-2026 academic year","poc":""},{"cgc":"Mumbai","role":"Member","name":"Adam Sobel","email":"ahs129@columbia.edu","title":"Professor of Applied Physics and Applied Mathematics","school":"Arts & Sciences - Earth and Environmental Sciences","termStart":null,"termEnd":"2026-03-01","termLength":"1 year","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Ruth DeFries","email":"rd2402@columbia.edu","title":"University Professor; Denning Family Professor of Sustainable Development","school":"Climate School","termStart":null,"termEnd":"2027-03-01","termLength":"2 years","notes":"On sabbatical during 2025-2026 academic year; was chair until Summer 2025","poc":""},{"cgc":"Mumbai","role":"Member","name":"Anupama Rao","email":"arao@barnard.edu","title":"Professor of History (Barnard) and MESAAS (Columbia)","school":"Barnard - History","termStart":null,"termEnd":"2027-03-01","termLength":"2 years","notes":"","poc":""},{"cgc":"Mumbai","role":"Member","name":"Vishakha Desai","email":"vd2278@columbia.edu","title":"Senior Fellow in Global Thought; Senior Advisor for Global Affairs to the President","school":"SIPA / CGT","termStart":null,"termEnd":"2028-03-01","termLength":"3 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Chair","name":"Vijay Modi","email":"rjd20@cumc.columbia.edu","title":"Professor of Mechanical Engineering and of Earth and Environmental Engineering","school":"SEAS","termStart":"2024-01-31","termEnd":"2026-01-31","termLength":"2 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Yanis Ben Amor","email":"yba2101@columbia.edu","title":"Assistant Professor of Global Health and Microbiological Sciences","school":"Climate / CUIMC","termStart":"2024-03-13","termEnd":"2027-03-12","termLength":"3 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Kiros Berhane","email":"ktb2132@cumc.columbia.edu","title":"Cynthia and Robert Citrone Professor of Biostatistics; Chair of Biostatistics","school":"Mailman School of Public Health","termStart":"2024-03-05","termEnd":"2027-03-04","termLength":"3 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Lisa Dale","email":"lad2189@columbia.edu","title":"Senior Lecturer in Climate; Director, M.A. in Climate and Society","school":"Climate","termStart":"2024-04-04","termEnd":null,"termLength":"","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Jennifer E. Dohrn","email":"jed19@cumc.columbia.edu","title":"Professor of Nursing; Assistant Dean, Global Initiatives","school":"Nursing","termStart":"2024-03-05","termEnd":"2027-03-04","termLength":"3 years","notes":"Retiring on Dec 31, 2025","poc":""},{"cgc":"Nairobi","role":"Member","name":"Joaquim Goes","email":"jig@ldeo.columbia.edu","title":"Lamont Research Professor, Biology and Paleo Environment","school":"Climate","termStart":"2024-01-25","termEnd":"2027-01-24","termLength":"3 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Farah Griffin","email":"fjg8@columbia.edu","title":"University Professor","school":"Arts & Sciences - English & Comparative Literature","termStart":"2024-03-04","termEnd":"2026-03-03","termLength":"2 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Kamel Jedidi","email":"kj7@gsb.columbia.edu","title":"Jerome A. Chazen Professor of Global Business in the Marketing Division","school":"CBS - Marketing","termStart":"2024-03-13","termEnd":"2027-03-12","termLength":"3 years","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Shannon Marquez","email":"s.marquez@columbia.edu","title":"Dean, Undergraduate Global Engagement","school":"UGE","termStart":"2024-01-29","termEnd":"2025-01-28","termLength":"1 year","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Dustin Rubenstein","email":"dr2497@columbia.edu","title":"Professor of Ecology, Evolution and Environmental Biology","school":"Arts & Sciences - EEEB","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Portia Williams","email":"pgw2102@columbia.edu","title":"Vice Provost for Academic Planning and Global Affairs","school":"Teachers College","termStart":"2024-02-26","termEnd":"2025-02-25","termLength":"1 year","notes":"","poc":""},{"cgc":"Nairobi","role":"Member","name":"Samantha Winter","email":"scw2154@columbia.edu","title":"Associate Professor of Social Work","school":"Social Work","termStart":"2024-01-29","termEnd":"2026-01-28","termLength":"2 years","notes":"","poc":""},{"cgc":"Paris","role":"Chair","name":"Katharina Pistor","email":"kpisto@law.columbia.edu","title":"Edwin B. Parker Professor of Comparative Law","school":"Law","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Magdalena Baczewska","email":"mb3713@columbia.edu","title":"Director, Music Performance Program; Senior Lecturer in the Discipline of Music","school":"Arts & Sciences - Music","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Linda Bell","email":"labell@barnard.edu","title":"Claire Tow Professor of Economics; Provost Emerita","school":"Barnard College - Economics","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"On sabbatical","poc":""},{"cgc":"Paris","role":"Member","name":"Thomas Dodman","email":"td2551@columbia.edu","title":"Associate Professor of French; Director, History & Literature Program","school":"Arts & Sciences - French","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Carol Gluck","email":"cg9@columbia.edu","title":"George Sansom Professor Emerita of History","school":"Arts & Sciences - History","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Frank Guridy","email":"fg2368@columbia.edu","title":"Dr. Kenneth and Kareitha Forde Professor of African American and African Diaspora Studies","school":"Arts & Sciences - History","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Emlyn Hughes","email":"ewh42@cumc.columbia.edu","title":"Professor of Physics","school":"Arts & Sciences - Physics","termStart":"2024-01-24","termEnd":"2025-01-23","termLength":"1 year","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Ira Katznelson","email":"iik1@columbia.edu","title":"Ruggles Professor of Political Science and History; Deputy Director, Columbia World Projects","school":"Arts & Sciences - History / Political Science","termStart":"2024-01-24","termEnd":"2027-01-23","termLength":"3 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Mark Mazower","email":"mmazower@columbia.edu","title":"Ira D. Wallach Professor of History; Stavros Niarchos Foundation Director","school":"Arts & Sciences - History","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Joseph Slaughter","email":"jrs272@columbia.edu","title":"Associate Professor of English and Comparative Literature; Executive Director, Institute for Human Rights","school":"Arts & Sciences - English & Comparative Literature","termStart":"2024-01-24","termEnd":"2026-01-23","termLength":"2 years","notes":"","poc":""},{"cgc":"Paris","role":"Member","name":"Emmanuelle Saada","email":"es2593@columbia.edu","title":"Professor of French and of History; Chair, Department of French","school":"Arts & Sciences - French / History","termStart":"2024-03-05","termEnd":"2027-03-04","termLength":"3 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Chair","name":"Bernard Salanié","email":"bsalanie@columbia.edu","title":"Sami Mnaymneh Professor of Economics","school":"Arts & Sciences - Economics","termStart":"2024-09-08","termEnd":"2027-09-07","termLength":"3 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Gustavo Azenha","email":"ga2161@columbia.edu","title":"Executive Director, Institute of Latin American Studies (ILAS); Lecturer in Anthropology","school":"Institute of Latin American Studies","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Paulo Blikstein","email":"paulob@tc.columbia.edu","title":"Director, Lemann Center for Brazilian Studies; Associate Professor at Teachers College","school":"Lemann Center / Teachers College / SEAS","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Suzana Camargo","email":"sjc71@columbia.edu","title":"Professor of Climate; Co-Director, Climate School Postdoctoral Program","school":"Climate","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Kartik Chandran","email":"kc2288@columbia.edu","title":"Professor of Earth and Environmental Engineering","school":"SEAS","termStart":"2024-09-15","termEnd":"2025-09-14","termLength":"1 year","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Amy Chazkel","email":"ac2227@columbia.edu","title":"Bernard Hirschhorn Associate Professor of Urban Studies","school":"Arts & Sciences - History","termStart":"2024-09-15","termEnd":"2025-09-14","termLength":"1 year","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Gaia Marchisio","email":"gm3055@columbia.edu","title":"Senior Lecturer in the Discipline of Management; Faculty Director, Global Family Enterprise Program","school":"CBS - Management","termStart":"2024-11-05","termEnd":"2026-11-04","termLength":"2 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Angela Olinto","email":"avo2113@columbia.edu","title":"Provost; Professor of Astronomy and of Physics","school":"Arts & Sciences - Astronomy / Physics","termStart":null,"termEnd":null,"termLength":"","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Brian Perkins","email":"bperkins@tc.columbia.edu","title":"Professor of Practice; Director, Summer Principals Academy","school":"Teachers College","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Cynthia Rosenzweig","email":"crr2@columbia.edu","title":"Senior Research Scientist, NASA Goddard Institute for Space Studies","school":"Climate","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Marcela Tamayo-Ortiz","email":"mt3743@cumc.columbia.edu","title":"Associate Professor of Environmental Health Sciences","school":"Mailman School of Public Health","termStart":"2024-10-23","termEnd":"2026-10-22","termLength":"2 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Maria Uriarte","email":"mu2126@columbia.edu","title":"Professor of Ecology, Evolution and Environmental Biology","school":"Arts & Sciences - EEEB","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Rio de Janeiro","role":"Member","name":"Daniel Zarilli","email":"daniel.zarrilli@columbia.edu","title":"Chief Climate & Sustainability Officer","school":"Climate / SIPA","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Walter Baethgen","email":"web2103@columbia.edu","title":"Senior Research Scientist and Acting Director, IRI for Climate and Society","school":"Climate","termStart":"2024-09-15","termEnd":"2025-09-14","termLength":"1 year","notes":"Partially retired; spending 50% of his time at Columbia","poc":""},{"cgc":"Santiago","role":"Member","name":"Nelson Fraiman","email":"nmf1@gsb.columbia.edu","title":"Professor of Professional Practice; Director, W. Edwards Deming Center","school":"CBS - Decision, Risk, and Operations","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"Retiring from full-time activities at the end of December 2025","poc":""},{"cgc":"Santiago","role":"Member","name":"Pablo Goldberg","email":"pg142@cumc.columbia.edu","title":"Associate Clinical Professor of Psychiatry","school":"CUIMC - Psychiatry","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Nara Milanich","email":"nmilanic@barnard.edu","title":"Professor and Chair of History","school":"Barnard - History","termStart":"2024-09-15","termEnd":"2026-09-14","termLength":"2 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Elena Cabral","email":"ecabral@columbia.edu","title":"Assistant Dean of Student and International Programs","school":"Journalism","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Cristóbal Otero","email":"c.otero@columbia.edu","title":"Assistant Professor of Business in the Economics Division","school":"CBS - Economics","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Sebastian Otero","email":"so2699@columbia.edu","title":"Assistant Professor of Economics","school":"Arts & Sciences - Economics","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Luisa Palacios","email":"l.palacios@columbia.edu","title":"Interim Director of Research and Managing Director of Energy Transition Finance","school":"SIPA - Center on Global Energy Policy","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Jeffrey Schlegelmilch","email":"js4645@columbia.edu","title":"Lamont Research Professor; Acting Director, Columbia Climate School Undergraduate Studies","school":"Climate","termStart":"2024-09-15","termEnd":"2027-09-14","termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Joerg Schaefer","email":"schaefer@ldeo.columbia.edu","title":"Lamont Research Professor; Adjunct Professor, Dept of Earth and Environmental Sciences","school":"Climate","termStart":null,"termEnd":null,"termLength":"3 years","notes":"","poc":""},{"cgc":"Santiago","role":"Member","name":"Duy Linh Tu","email":"dnt3@columbia.edu","title":"Dean of Academic Affairs and Professor of Professional Practice","school":"Journalism","termStart":null,"termEnd":null,"termLength":"3 years","notes":"","poc":""},{"cgc":"Tunis","role":"Chair","name":"Kamel Jedidi","email":"kj7@columbia.edu","title":"Jerome A. Chazen Professor of Global Business in the Marketing Division","school":"CBS - Marketing","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Sunil Agrawal","email":"sunil.agrawal@columbia.edu","title":"Professor of Mechanical Engineering and Professor of Rehabilitation and Regenerative Medicine","school":"SEAS","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Lisa Anderson","email":"la8@columbia.edu","title":"James T. Shotwell Professor Emerita of International Relations; Dean Emerita of SIPA","school":"SIPA","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Souleymane Bachir Diagne","email":"sd2456@columbia.edu","title":"Professor of French and of Philosophy","school":"Arts & Sciences - French / Philosophy","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Madeleine Dobie","email":"mld2027@columbia.edu","title":"Professor of French and Comparative Literature","school":"Arts & Sciences - French","termStart":"2024-02-06","termEnd":"2027-02-05","termLength":"3 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Ziad Jamaleddine","email":"mzj2104@columbia.edu","title":"Assistant Professor of Architecture, Planning and Preservation","school":"GSAPP","termStart":"2024-02-06","termEnd":"2025-02-05","termLength":"1 year","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Gayatri Spivak","email":"gcs4@columbia.edu","title":"University Professor in the Humanities","school":"Arts & Sciences - English & Comparative Literature","termStart":"2024-02-06","termEnd":"2025-02-05","termLength":"1 year","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Joseph Terwilliger","email":"jdt3@cumc.columbia.edu","title":"Professor of Neurobiology","school":"CUIMC","termStart":"2024-02-06","termEnd":"2025-02-05","termLength":"1 year","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Eric Verhoogen","email":"ev2124@columbia.edu","title":"Professor of International and Public Affairs and of Economics","school":"Arts & Sciences - Economics / SIPA","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"","poc":""},{"cgc":"Tunis","role":"Member","name":"Portia Williams","email":"pgw2102@columbia.edu","title":"Vice Provost for Academic Planning and Global Affairs","school":"Teachers College","termStart":"2024-02-06","termEnd":"2026-02-05","termLength":"2 years","notes":"","poc":""}];
+
+const STORAGE_KEY = 'cgc_fac_v3';
+let members = [];
+let sortField = 'termEnd';
+let sortAsc = true;
+let activeTab = 'all';
+let editingIndex = null;
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    members = saved ? JSON.parse(saved) : RAW_DATA.map((m,i)=>({...m,id:i}));
+    if (!saved) saveData();
+  } catch(e) { members = RAW_DATA.map((m,i)=>({...m,id:i})); }
+}
+function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(members)); } catch(e) {} }
+function today() { return new Date(); }
+function daysLeft(termEnd) {
+  if (!termEnd) return null;
+  return Math.round((new Date(termEnd) - today()) / 86400000);
+}
+function getUrgency(termEnd) {
+  const d = daysLeft(termEnd);
+  if (d === null) return 'none';
+  if (d < 0) return 'expired';
+  if (d <= 30) return 'critical';
+  if (d <= 90) return 'warning';
+  if (d <= 180) return 'watch';
+  return 'ok';
+}
+function urgencyLabel(termEnd) {
+  const d = daysLeft(termEnd);
+  if (d === null) return ['none', 'No date'];
+  if (d < 0) return ['expired', `Expired ${Math.abs(d)}d ago`];
+  if (d === 0) return ['critical', 'Expires today'];
+  if (d <= 30) return ['critical', `${d}d left`];
+  if (d <= 90) return ['warning', `${d}d left`];
+  if (d <= 180) return ['watch', `${d}d left`];
+  return ['ok', `${d}d left`];
+}
+function formatDate(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function filterMembers() {
+  const cgc = document.getElementById('filterCGC').value;
+  const role = document.getElementById('filterRole').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const window_ = document.getElementById('filterWindow').value;
+  return members.filter(m => {
+    if (cgc && m.cgc !== cgc) return false;
+    if (role && m.role !== role) return false;
+    if (search && !`${m.name} ${m.school} ${m.email} ${m.title} ${m.cgc}`.toLowerCase().includes(search)) return false;
+    const d = daysLeft(m.termEnd);
+    if (activeTab === 'expired') return d !== null && d < 0;
+    if (activeTab === '1') return d !== null && d >= 0 && d <= 30;
+    if (activeTab === '3') return d !== null && d >= 0 && d <= 90;
+    if (activeTab === '6') return d !== null && d >= 0 && d <= 180;
+    if (activeTab === 'all') {
+      if (window_ === 'expired') return d !== null && d < 0;
+      if (window_ === 'all') return true;
+      const days = parseInt(window_) * 30;
+      return d !== null && d >= 0 && d <= days;
+    }
+    return true;
+  });
+}
+
+function sortMembers(list) {
+  const f = document.getElementById('sortBy').value || sortField;
+  return [...list].sort((a, b) => {
+    let va, vb;
+    if (f === 'daysLeft') { va = daysLeft(a.termEnd) ?? 9999999; vb = daysLeft(b.termEnd) ?? 9999999; }
+    else if (f === 'termEnd') { va = a.termEnd || 'zzz'; vb = b.termEnd || 'zzz'; }
+    else if (f === 'termStart') { va = a.termStart || 'zzz'; vb = b.termStart || 'zzz'; }
+    else { va = (a[f]||'').toLowerCase(); vb = (b[f]||'').toLowerCase(); }
+    return va < vb ? (sortAsc?-1:1) : va > vb ? (sortAsc?1:-1) : 0;
+  });
+}
+
+function toggleSort(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = true; }
+  document.getElementById('sortBy').value = field;
+  render();
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  render();
+}
+
+function updateBadges() {
+  document.getElementById('badge-all').textContent = members.length;
+  document.getElementById('badge-expired').textContent = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d<0; }).length;
+  document.getElementById('badge-1').textContent = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d>=0&&d<=30; }).length;
+  document.getElementById('badge-3').textContent = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d>=0&&d<=90; }).length;
+  document.getElementById('badge-6').textContent = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d>=0&&d<=180; }).length;
+}
+
+function updateHeaderStats() {
+  const expired = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d<0; }).length;
+  const crit = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d>=0&&d<=30; }).length;
+  const warn = members.filter(m => { const d=daysLeft(m.termEnd); return d!==null&&d>=0&&d<=90; }).length;
+  document.getElementById('headerStats').innerHTML = `
+    <div class="stat-pill total"><div class="num">${members.length}</div><div class="label">Total</div></div>
+    <div class="stat-pill critical"><div class="num">${expired}</div><div class="label">Expired</div></div>
+    <div class="stat-pill warning"><div class="num">${crit}</div><div class="label">≤ 1 Month</div></div>
+    <div class="stat-pill watch"><div class="num">${warn}</div><div class="label">≤ 3 Months</div></div>
+  `;
+}
+
+function render() {
+  updateBadges();
+  updateHeaderStats();
+  const filtered = sortMembers(filterMembers());
+  const tbody = document.getElementById('tableBody');
+  const noResults = document.getElementById('noResults');
+  const tableWrap = document.getElementById('tableWrap');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    tableWrap.style.display = 'none';
+    noResults.classList.remove('hidden');
+    return;
+  }
+  tableWrap.style.display = '';
+  noResults.classList.add('hidden');
+  tbody.innerHTML = filtered.map(m => {
+    const [uClass, uLabel] = urgencyLabel(m.termEnd);
+    const idx = members.indexOf(m);
+    const school = m.school.length > 28 ? m.school.substring(0,28)+'…' : m.school;
+    return `<tr>
+      <td class="td-name" onclick="openDetail(${idx})">${m.name}</td>
+      <td class="td-cgc">${m.cgc}</td>
+      <td><span class="td-role ${m.role.toLowerCase()}">${m.role}</span></td>
+      <td class="td-school" title="${m.school}">${school}</td>
+      <td class="td-date">${formatDate(m.termStart)}</td>
+      <td class="td-date">${formatDate(m.termEnd)}</td>
+      <td style="color:var(--muted);font-size:12px">${m.termLength||'—'}</td>
+      <td><span class="urgency-badge ${uClass}">${uLabel}</span></td>
+      <td>
+        <button class="action-btn" onclick="openModal(${idx})">Edit</button>
+        <button class="action-btn delete" onclick="deleteMember(${idx})">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function populateCGCFilter() {
+  const cgcs = [...new Set(members.map(m=>m.cgc))].sort();
+  const sel = document.getElementById('filterCGC');
+  cgcs.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+}
+
+function openModal(idx=null) {
+  editingIndex = idx;
+  const m = idx !== null ? members[idx] : null;
+  document.getElementById('modalTitle').textContent = m ? 'Edit FAC Member' : 'Add FAC Member';
+  document.getElementById('f-first').value = m ? m.name.split(' ')[0] : '';
+  document.getElementById('f-last').value = m ? m.name.split(' ').slice(1).join(' ') : '';
+  document.getElementById('f-cgc').value = m ? m.cgc : '';
+  document.getElementById('f-role').value = m ? m.role : 'Member';
+  document.getElementById('f-email').value = m ? m.email : '';
+  document.getElementById('f-school').value = m ? m.school : '';
+  document.getElementById('f-title').value = m ? m.title : '';
+  document.getElementById('f-termStart').value = m ? (m.termStart||''): '';
+  document.getElementById('f-termEnd').value = m ? (m.termEnd||''): '';
+  document.getElementById('f-termLength').value = m ? (m.termLength||''): '';
+  document.getElementById('f-notes').value = m ? m.notes : '';
+  document.getElementById('f-poc').value = m ? m.poc : '';
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
+
+function saveMember() {
+  const first = document.getElementById('f-first').value.trim();
+  const last = document.getElementById('f-last').value.trim();
+  const cgc = document.getElementById('f-cgc').value;
+  if (!first||!last||!cgc) { alert('Name and CGC Centre are required.'); return; }
+  const member = {
+    id: editingIndex !== null ? members[editingIndex].id : Date.now(),
+    cgc, role: document.getElementById('f-role').value,
+    name: `${first} ${last}`,
+    email: document.getElementById('f-email').value.trim(),
+    title: document.getElementById('f-title').value.trim(),
+    school: document.getElementById('f-school').value.trim(),
+    termStart: document.getElementById('f-termStart').value || null,
+    termEnd: document.getElementById('f-termEnd').value || null,
+    termLength: document.getElementById('f-termLength').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    poc: document.getElementById('f-poc').value.trim(),
+  };
+  if (editingIndex !== null) members[editingIndex] = member;
+  else members.push(member);
+  saveData(); closeModal(); render();
+}
+
+function deleteMember(idx) {
+  if (!confirm(`Remove ${members[idx].name}?`)) return;
+  members.splice(idx, 1); saveData(); render();
+}
+
+function openDetail(idx) {
+  const m = members[idx];
+  const [uClass, uLabel] = urgencyLabel(m.termEnd);
+  let pct = 0;
+  if (m.termStart && m.termEnd) {
+    const total = new Date(m.termEnd) - new Date(m.termStart);
+    pct = Math.min(100, Math.max(0, Math.round(((today()-new Date(m.termStart))/total)*100)));
+  }
+  const barColor = {expired:'var(--red)',critical:'var(--orange)',warning:'var(--yellow)',ok:'var(--green)',watch:'var(--columbia-blue-dark)'}[uClass] || 'var(--muted)';
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-header">
+      <button class="detail-close" onclick="document.getElementById('detailOverlay').classList.add('hidden')">✕ Close</button>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--columbia-blue);font-weight:600;margin-bottom:6px">CGC ${m.cgc}</div>
+      <div class="detail-name">${m.name}</div>
+      <div class="detail-role-cgc" style="margin-top:10px">
+        <span class="td-role ${m.role.toLowerCase()}">${m.role}</span>
+        <span class="urgency-badge ${uClass}" style="border-color:rgba(255,255,255,0.2)">${uLabel}</span>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>Academic Title</h4>
+        <p>${m.title||'—'}</p>
+      </div>
+      <div class="detail-section">
+        <h4>School / Department</h4>
+        <p>${m.school||'—'}</p>
+      </div>
+      <div class="detail-section">
+        <h4>Email</h4>
+        <p>${m.email ? `<a href="mailto:${m.email}">${m.email}</a>` : '—'}</p>
+      </div>
+      <hr class="detail-divider"/>
+      <div class="detail-section">
+        <h4>FAC Term</h4>
+        <p style="font-weight:600">${formatDate(m.termStart)} → ${formatDate(m.termEnd)}</p>
+        <p style="color:var(--muted);font-size:12px;margin-top:2px">Duration: ${m.termLength||'Unknown'}</p>
+        <div class="tenure-bar"><div class="tenure-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:5px">${pct}% of term elapsed</p>
+      </div>
+      ${m.notes ? `<div class="detail-section"><h4>Notes</h4><p>${m.notes}</p></div>` : ''}
+      ${m.poc ? `<div class="detail-section"><h4>Point of Contact</h4><p style="font-size:12px">${m.poc}</p></div>` : ''}
+      <hr class="detail-divider"/>
+      <button class="action-btn" style="width:100%;text-align:center;padding:9px;font-size:13px" onclick="document.getElementById('detailOverlay').classList.add('hidden');openModal(${idx})">✏ Edit this Member</button>
+    </div>
+  `;
+  document.getElementById('detailOverlay').classList.remove('hidden');
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('detailOverlay')) return;
+  document.getElementById('detailOverlay').classList.add('hidden');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+loadData();
+populateCGCFilter();
+render();
+</script>
+</body>
+</html>
